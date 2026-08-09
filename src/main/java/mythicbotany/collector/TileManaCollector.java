@@ -39,20 +39,29 @@ public class TileManaCollector extends BlockEntityMana implements ManaCollector,
         return this.maxMana;
     }
 
+    @Override
     public void setRemoved() {
         super.setRemoved();
-        NeoForge.EVENT_BUS.post(new ManaNetworkEvent(this, ManaBlockType.COLLECTOR, ManaNetworkAction.REMOVE));
+        if (this.level != null && this.level.isClientSide()) {
+            NeoForge.EVENT_BUS.post(new ManaNetworkEvent(this, ManaBlockType.COLLECTOR, ManaNetworkAction.REMOVE));
+        }
     }
 
+    @Override
     public void onChunkUnloaded() {
         super.onChunkUnloaded();
-        NeoForge.EVENT_BUS.post(new ManaNetworkEvent(this, ManaBlockType.COLLECTOR, ManaNetworkAction.REMOVE));
+        if (this.level != null && this.level.isClientSide()) {
+            NeoForge.EVENT_BUS.post(new ManaNetworkEvent(this, ManaBlockType.COLLECTOR, ManaNetworkAction.REMOVE));
+        }
     }
 
+    @Override
     public void tick() {
-        boolean inNetwork = ManaNetworkHandler.instance.isCollectorIn(this.level, this);
-        if (!inNetwork && !this.isRemoved()) {
-            NeoForge.EVENT_BUS.post(new ManaNetworkEvent(this, ManaBlockType.COLLECTOR, ManaNetworkAction.ADD));
+        if (this.level != null && this.level.isClientSide()) {
+            boolean inNetwork = ManaNetworkHandler.instance.isCollectorIn(this.level, this);
+            if (!inNetwork && !this.isRemoved()) {
+                NeoForge.EVENT_BUS.post(new ManaNetworkEvent(this, ManaBlockType.COLLECTOR, ManaNetworkAction.ADD));
+            }
         }
     }
 }
